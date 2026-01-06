@@ -1,35 +1,59 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import { useGetPokemonListByNameQuery } from './services/pokemonApi';
+import PokemonGrid from './components/pokemonGrid';
+import { PokemonCard } from './components/pokemonCard';
+import { PokemonDetail } from './components/pokemonDetail';
+import './styles/App.css';
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedPokemon, setSelectedPokemon] = useState<string | null>(null);
+
+  const { data: searchResult, isFetching: isSearching } = useGetPokemonListByNameQuery(searchTerm, {
+    skip: searchTerm.length < 3,
+  });
+
+  const handleCardClick = (name: string) => {
+    setSelectedPokemon(name);
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div className="app-container">
+      <div className="author-tag">Daniel García</div>
 
-export default App
+      {selectedPokemon ? (
+        <PokemonDetail
+          name={selectedPokemon}
+          onClose={() => setSelectedPokemon(null)}
+        />
+      ) : (
+        <>
+          <div className="search-container">
+            <h1 style={{ color: 'var(--poke-blue)' }}>¡Atrápalos a todos!</h1>
+            <input
+              className="search-input"
+              placeholder="¿Qué Pokémon buscas? (Ej: Pikachu)"
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          {searchTerm.length >= 3 && (
+            <div className="search-results">
+              {isSearching ? (
+                <p>Buscando...</p>
+              ) : searchResult ? (
+                <PokemonCard name={searchResult.name} onCardClick={handleCardClick} />
+              ) : (
+                <p>Pokémon no encontrado (revisa tu ortografía)</p>
+              )}
+            </div>
+          )}
+          {searchTerm.length < 3 && (
+            <PokemonGrid onCardClick={handleCardClick} />
+          )}
+        </>
+      )}
+    </div>
+  );
+}
