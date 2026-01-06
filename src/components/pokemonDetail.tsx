@@ -8,7 +8,7 @@ export const PokemonDetail = ({ name, onClose }: { name: string, onClose: () => 
 
     return (
         <div className="detail-view">
-            <button onClick={onClose}>← Back to Grid</button>
+            <button onClick={onClose}>← Regresar</button>
             <div className="pokemon-card" >
                 <img src={data.sprites.other['official-artwork'].front_default} alt={name} />
                 <h2>{data.name.toUpperCase()}</h2>
